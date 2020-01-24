@@ -24,6 +24,7 @@ world.load_graph(room_graph)
 world.print_rooms()
 
 # Seed for the pseudorandom number generator
+# Best so far: 22902, number of moves 956
 seed = 22902
 shortest_traversal = 20000
 # Lookup for finding direction player came from
@@ -99,6 +100,23 @@ while True:
         print(f"Seed: {seed}")
         shortest_traversal = len(traversal_path)
 
+        # TRAVERSAL TEST
+        visited_rooms = set()
+        player.current_room = world.starting_room
+        visited_rooms.add(player.current_room)
+
+        for move in traversal_path:
+            player.travel(move)
+            visited_rooms.add(player.current_room)
+
+        if len(visited_rooms) == len(room_graph):
+            print(
+                f"TESTS PASSED: {len(traversal_path)} moves, {len(visited_rooms)} rooms visited")
+        else:
+            print("TESTS FAILED: INCOMPLETE TRAVERSAL")
+            print(f"{len(room_graph) - len(visited_rooms)} unvisited rooms")
+        print(f"TOTAL MOVES: {len(traversal_path)}")
+
     seed += 1
 
 # TRAVERSAL TEST
@@ -117,17 +135,3 @@ else:
     print("TESTS FAILED: INCOMPLETE TRAVERSAL")
     print(f"{len(room_graph) - len(visited_rooms)} unvisited rooms")
 print(f"TOTAL MOVES: {len(traversal_path)}")
-
-
-#######
-# UNCOMMENT TO WALK AROUND
-#######
-# player.current_room.print_room_description(player)
-# while True:
-#     cmds = input("-> ").lower().split(" ")
-#     if cmds[0] in ["n", "s", "e", "w"]:
-#         player.travel(cmds[0], True)
-#     elif cmds[0] == "q":
-#         break
-#     else:
-#         print("I did not understand that command.")
