@@ -88,7 +88,7 @@ class Graph:
             # And if we've found a room with an unopened door, return our path to that room
             if '?' in self.rooms[current_room].values():
                 # Return path as directions
-                return [path, self.path_to_directions(path)]
+                return self.path_to_directions(path)
 
             # If the room has not been visited
             if current_room not in visited:
