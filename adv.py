@@ -24,11 +24,9 @@ world.load_graph(room_graph)
 world.print_rooms()
 
 # Seed for the pseudorandom number generator
-# Best so far: 22902, number of moves 956
-seed = 22902
+# Best so far: 386839, number of moves 948
+seed = 386839
 shortest_traversal = 20000
-# Lookup for finding direction player came from
-reverse_dir = {'n': 's', 'e': 'w', 's': 'n', 'w': 'e'}
 
 # Find random traversals endlessly, incrementing seed and looking for better ones
 while True:
@@ -70,8 +68,9 @@ while True:
                 # If there's more than one exit, remove the direction player came from
                 # In order to force a turn
                 if len(exits) > 1 and len(traversal_path) > 0:
-                    prev_dir = reverse_dir[traversal_path[-1]]
-                    if prev_dir in exits:
+                    prev_dir = traversal_path[-1]
+                    # 30% of the time, don't continue straight
+                    if prev_dir in exits and random.random() > 0.7:
                         exits.remove(prev_dir)
                     direction = random.choice(exits)
                 else:
