@@ -54,6 +54,19 @@ class Graph:
         # return unvisited neighboring rooms
         return [exit for exit in self.rooms[room_id] if self.rooms[room_id][exit] == '?']
 
+    def path_to_directions(self, path):
+        print(path)
+        traversal = []
+        current_room = path.pop(0)
+        while len(path) > 0:
+            next_room = path.pop(0)
+            reverse_keys = {value: key for key,
+                            value in self.rooms[current_room].items()}
+            traversal.append(reverse_keys[next_room])
+            print(current_room, next_room, reverse_keys[next_room])
+            current_room = next_room
+        return traversal
+
     def bfs(self, starting_room):
         """
         Return a list containing the shortest path from
@@ -74,18 +87,21 @@ class Graph:
             path = q.dequeue()
             # Look at the last room in the path...
             current_room = path[-1]
-            # And if it is the current room, we're done searching
+            # And if we've found a room with an unopened door, return our path to that room
+            print("Current room", current_room)
+            print(self.rooms[current_room])
             if '?' in self.rooms[current_room].values():
-                return path
+                # Return path as directions
+                return [path, self.path_to_directions(path)]
 
             # If the room has not been visited
             if current_room not in visited:
                 # Mark it as visited
                 visited.add(current_room)
                 # Add a path to each room to the queue
-                for room in self.get_visited_neighbors(current_room):
+                for room in self.get_connected_rooms(current_room, visited=True):
                     new_path = path.copy()
-                    new_path.append(room)
+                    new_path.append(self.rooms[current_room][room])
                     q.enqueue(new_path)
 
         return None

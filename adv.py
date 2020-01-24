@@ -16,7 +16,6 @@ world = World()
 # map_file = "maps/test_loop.txt"
 # map_file = "maps/test_loop_fork.txt"
 map_file = "maps/main_maze.txt"
-
 # Loads the map into a dictionary
 room_graph = literal_eval(open(map_file, "r").read())
 world.load_graph(room_graph)
@@ -37,25 +36,44 @@ visited_rooms.add(player.current_room)
 graph = Graph()
 graph.add_room(player.current_room.id, player.current_room.get_exits())
 print(graph.rooms)
+# exit()
 
+random.seed(1)
 while len(visited_rooms) != len(room_graph):
-    exits = graph.get_connected_rooms(player.current_room.id)
+    exits = graph.get_connected_rooms(player.current_room.id, visited=False)
+    print(player.current_room.id, "Exits: ", exits)
     if exits:
+        print("Exits found")
         prev_room = player.current_room
         direction = random.choice(exits)
+        print(player.current_room, "Going:", direction)
         player.travel(direction)
+        print("Went", direction)
         traversal_path.append(direction)
         visited_rooms.add(player.current_room)
         graph.add_room(player.current_room.id, player.current_room.get_exits())
         graph.connect_rooms(prev_room.id, player.current_room.id, direction)
+        print(prev_room.id, player.current_room.id)
     else:
-        exits = graph.get_connected_rooms(player.current_room.id, visited=True)
-        direction = random.choice(exits)
-        player.travel(direction)
-        traversal_path.append(direction)
+        print("dead end")
+        # exits = graph.get_connected_rooms(player.current_room.id, visited=True)
+        # direction = random.choice(exits)
+        # player.travel(direction)
+        # traversal_path.append(direction)
+        path, route = graph.bfs(player.current_room.id)
+        print(path, route)
+        for direction in route:
+            print(direction, end=" ", flush=True)
+            player.travel(direction)
+            traversal_path.append(direction)
+        print(f"\n{player.current_room.id}")
+        # exit()
 
-    # print(graph.rooms, len(visited_rooms), len(room_graph))
-
+print(graph.rooms, len(visited_rooms), len(room_graph))
+print(traversal_path)
+# print(visited_rooms)
+# ['n', 'n', 'w', 'w', 'n', 'e', 'e', 'n', 'e',
+# 'e', 's', 's', 'w', 'w', 'n', 'n', 'e']
 
 # TRAVERSAL TEST
 visited_rooms = set()
