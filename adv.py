@@ -23,57 +23,50 @@ world.load_graph(room_graph)
 # Print an ASCII map
 world.print_rooms()
 
-player = Player(world.starting_room)
+seed = 0
+shortest_traversal = 20000
 
-# Fill this out with directions to walk
-# traversal_path = ['n', 'n']
-traversal_path = []
+while True:
+    random.seed(seed)
 
-visited_rooms = set()
-player.current_room = world.starting_room
-visited_rooms.add(player.current_room)
+    player = Player(world.starting_room)
 
-graph = Graph()
-graph.add_room(player.current_room.id, player.current_room.get_exits())
-print(graph.rooms)
-# exit()
+    # Fill this out with directions to walk
+    traversal_path = []
 
-random.seed(1)
-while len(visited_rooms) != len(room_graph):
-    exits = graph.get_connected_rooms(player.current_room.id, visited=False)
-    print(player.current_room.id, "Exits: ", exits)
-    if exits:
-        print("Exits found")
-        prev_room = player.current_room
-        direction = random.choice(exits)
-        print(player.current_room, "Going:", direction)
-        player.travel(direction)
-        print("Went", direction)
-        traversal_path.append(direction)
-        visited_rooms.add(player.current_room)
-        graph.add_room(player.current_room.id, player.current_room.get_exits())
-        graph.connect_rooms(prev_room.id, player.current_room.id, direction)
-        print(prev_room.id, player.current_room.id)
-    else:
-        print("dead end")
-        # exits = graph.get_connected_rooms(player.current_room.id, visited=True)
-        # direction = random.choice(exits)
-        # player.travel(direction)
-        # traversal_path.append(direction)
-        path, route = graph.bfs(player.current_room.id)
-        print(path, route)
-        for direction in route:
-            print(direction, end=" ", flush=True)
+    visited_rooms = set()
+    player.current_room = world.starting_room
+    visited_rooms.add(player.current_room)
+
+    graph = Graph()
+    graph.add_room(player.current_room.id, player.current_room.get_exits())
+
+    while len(visited_rooms) != len(room_graph):
+        exits = graph.get_connected_rooms(
+            player.current_room.id, visited=False)
+        if exits:
+            prev_room = player.current_room
+            direction = random.choice(exits)
             player.travel(direction)
             traversal_path.append(direction)
-        print(f"\n{player.current_room.id}")
-        # exit()
+            visited_rooms.add(player.current_room)
+            graph.add_room(player.current_room.id,
+                           player.current_room.get_exits())
+            graph.connect_rooms(
+                prev_room.id, player.current_room.id, direction)
+        else:
+            path, route = graph.bfs(player.current_room.id)
+            for direction in route:
+                player.travel(direction)
+                traversal_path.append(direction)
 
-print(graph.rooms, len(visited_rooms), len(room_graph))
-print(traversal_path)
-# print(visited_rooms)
-# ['n', 'n', 'w', 'w', 'n', 'e', 'e', 'n', 'e',
-# 'e', 's', 's', 'w', 'w', 'n', 'n', 'e']
+    if len(traversal_path) < shortest_traversal:
+        print(f"New shorter traversal found: {traversal_path}")
+        print(f"Number of moves: {len(traversal_path)}")
+        print(f"Seed: {seed}")
+        shortest_traversal = len(traversal_path)
+
+    seed += 1
 
 # TRAVERSAL TEST
 visited_rooms = set()
