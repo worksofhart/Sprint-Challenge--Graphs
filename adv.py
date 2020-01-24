@@ -23,10 +23,14 @@ world.load_graph(room_graph)
 # Print an ASCII map
 world.print_rooms()
 
-seed = 0
+seed = 7676
 shortest_traversal = 20000
+reverse_dir = {'n': 's', 'e': 'w', 's': 'n', 'w': 'e'}
 
 while True:
+    if not seed % 1000:
+        print(f"{seed}", end="\r", flush=True)
+
     random.seed(seed)
 
     player = Player(world.starting_room)
@@ -41,12 +45,25 @@ while True:
     graph = Graph()
     graph.add_room(player.current_room.id, player.current_room.get_exits())
 
+    backtracked = False
     while len(visited_rooms) != len(room_graph):
         exits = graph.get_connected_rooms(
             player.current_room.id, visited=False)
         if exits:
             prev_room = player.current_room
-            direction = random.choice(exits)
+            if not backtracked:
+                # If we didn't backtrack, bias toward making turns rather than going straight
+                if len(exits) > 1 and len(traversal_path) > 0:
+                    prev_dir = reverse_dir[traversal_path[-1]]
+                    if prev_dir in exits:
+                        exits.remove(prev_dir)
+                    direction = random.choice(exits)
+                else:
+                    direction = exits[0]
+            else:
+                # If we backtracked from a dead end, take next avail clockwise turn
+                direction = exits[0]
+                backtracked = False
             player.travel(direction)
             traversal_path.append(direction)
             visited_rooms.add(player.current_room)
@@ -59,6 +76,7 @@ while True:
             for direction in route:
                 player.travel(direction)
                 traversal_path.append(direction)
+            backtracked = True
 
     if len(traversal_path) < shortest_traversal:
         print(f"New shorter traversal found: {traversal_path}")
