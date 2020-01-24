@@ -26,14 +26,14 @@ class Graph:
     def __init__(self):
         self.rooms = {}
 
-    def add_room(self, room_id):
+    def add_room(self, room_id, exits):
         """
         Add a room to the graph.
         """
         if not room_id in self.rooms:
-            self.rooms[room_id] = {'n': '?', 's': '?', 'e': '?', 'w': '?'}
+            self.rooms[room_id] = {x: '?' for x in exits}
 
-    def add_door(self, room1_id, room2_id, direction):
+    def connect_rooms(self, room1_id, room2_id, direction):
         """
         Add a directed edge to the graph.
         """
@@ -45,17 +45,20 @@ class Graph:
         else:
             raise IndexError("That room does not exist.")
 
-    def get_neighbors(self, room_id):
+    def get_connected_rooms(self, room_id, visited=False):
         """
-        Get all neighbors (doors) of a room.
+        Get exits from a room.
         """
-        return self.rooms[room_id]
+        if visited == True:  # return only previously visited neighboring rooms
+            return [exit for exit in self.rooms[room_id] if self.rooms[room_id][exit] != '?']
+        # return unvisited neighboring rooms
+        return [exit for exit in self.rooms[room_id] if self.rooms[room_id][exit] == '?']
 
-    def bfs(self, starting_room, destination_room):
+    def bfs(self, starting_room):
         """
         Return a list containing the shortest path from
         starting_room to destination_room in
-        breath-first order.
+        breadth-first order.
         """
 
         # Create an empty queue and enqueue the starting room ID
@@ -72,17 +75,17 @@ class Graph:
             # Look at the last room in the path...
             current_room = path[-1]
             # And if it is the current room, we're done searching
-            if current_room == destination_room:
+            if '?' in self.rooms[current_room].values():
                 return path
 
             # If the room has not been visited
             if current_room not in visited:
                 # Mark it as visited
                 visited.add(current_room)
-                # Add a path to each neighbor to the queue
-                for neighbor in self.get_neighbors(current_room):
+                # Add a path to each room to the queue
+                for room in self.get_visited_neighbors(current_room):
                     new_path = path.copy()
-                    new_path.append(neighbor)
+                    new_path.append(room)
                     q.enqueue(new_path)
 
         return None

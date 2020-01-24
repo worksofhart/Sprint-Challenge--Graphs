@@ -1,6 +1,7 @@
 from room import Room
 from player import Player
 from world import World
+from util import Graph
 
 import random
 from ast import literal_eval
@@ -26,8 +27,34 @@ world.print_rooms()
 player = Player(world.starting_room)
 
 # Fill this out with directions to walk
-traversal_path = ['n', 'n']
-# traversal_path = []
+# traversal_path = ['n', 'n']
+traversal_path = []
+
+visited_rooms = set()
+player.current_room = world.starting_room
+visited_rooms.add(player.current_room)
+
+graph = Graph()
+graph.add_room(player.current_room.id, player.current_room.get_exits())
+print(graph.rooms)
+
+while len(visited_rooms) != len(room_graph):
+    exits = graph.get_connected_rooms(player.current_room.id)
+    if exits:
+        prev_room = player.current_room
+        direction = random.choice(exits)
+        player.travel(direction)
+        traversal_path.append(direction)
+        visited_rooms.add(player.current_room)
+        graph.add_room(player.current_room.id, player.current_room.get_exits())
+        graph.connect_rooms(prev_room.id, player.current_room.id, direction)
+    else:
+        exits = graph.get_connected_rooms(player.current_room.id, visited=True)
+        direction = random.choice(exits)
+        player.travel(direction)
+        traversal_path.append(direction)
+
+    # print(graph.rooms, len(visited_rooms), len(room_graph))
 
 
 # TRAVERSAL TEST
